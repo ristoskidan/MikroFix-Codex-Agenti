@@ -266,6 +266,27 @@ običajni zaključni odgovor; veljavno vedenje opisuje odločitev
   Potrjeno odločitev odgovorni skrbnik prenese v pravi kanonski ali operativni
   vir.
 
+### SIDRO-20261012-16 — Pilot Gemma12 in izolirana delovna mapa
+
+- Lastnikova omejitev, predana v sobi: najprej samo Gemma12. Gemma26 je
+  povrnjena, Ministral ostaja nespremenjen. To ni razveljavitev že potrjenega
+  skupnega bridgea, ampak omejitev novega pilota.
+- Pregledano trenutno stanje: `gemma4-12b-coder` ohranja privzeti projekt,
+  sprejme eno neobvezno pot, zahteva koren Git delovne kopije ter berljiva
+  `AGENTS.md` in `CODER.md`. Pred bridgeem izvede `cd` v preverjeni koren;
+  `safe_patch_mcp.js` pri uporabi Gita uporablja podedovani `process.cwd()`.
+  Izolirana pot dobi nevtralen začetni poziv.
+- Gemma12 ima v aktivni konfiguraciji `safe_patch`. KERN poroča o uspešni
+  omejeni spremembi in enem uspešnem testu v seji
+  `01a130fd-f6e9-7f03-9df3-fde75b5b0c4c`, o veljavni sintaksi zaganjalnika
+  in zavrnitvi podmape. To so predana dokazila, ne novi Sidrovi testi.
+- Odprto: lastnikov ročni vedenjski preizkus v
+  `/home/mikrofix/goal_guard_lab/eval_runs/gemma12_owner_test`. Statični pregled
+  poti ne dokazuje celotnega vedenja modela. Kandidat varovalke ponovljenih
+  neuspešnih ukazov ostaja neaktiven.
+- Obseg zapisa je operativni pilot, ne sprememba poslovnega kanona. KERN
+  poroča, da produkcijska koda in drugi modeli s tem popravkom niso spremenjeni.
+
 ## Razrešena vprašanja
 
 ### SIDRO-OPEN-01 — Izolirani preizkus varovalke
@@ -288,6 +309,9 @@ preizkusi ne smejo razvrednotiti že potrjenega skupnega mehanizma brez novega
 nasprotnega dokaza.
 
 ## Dnevnik
+
+- 2026-10-12: evidentiran pilot samo Gemma12 in pregledana povezava izbranega
+  Git korena z bridgeem ter `safe_patch`; lastnikov ročni preizkus ostaja odprt.
 
 - 2026-10-11: ustvarjena izhodiščna točka vloge Sidro; zapisane doslej potrjene
   procesne odločitve in odprta vrzel glede zanke odobritev.

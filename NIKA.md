@@ -100,15 +100,24 @@ neoznačenih odgovorih, skupno stanje niti znotraj živega relay procesa in
 ponovno oborožitev ob zavrnjeni prekinitvi. KERN je pred mojim pregledom
 poročal o 8 uspešnih izoliranih testih. Pri pregledu sem zožila **le**
 hevristiko podobnosti neoznačenih odgovorov: približno ujemanje zdaj zahteva
-vsaj štiri ključne besede na vsaki strani in 70-odstotno prekrivanje, da
-kratka podmnožica daljšega odgovora ne šteje samodejno za enak zastoj.
+vsaj štiri ključne besede na vsaki strani, razmerje dolžin vsaj 75 % in
+60-odstotno prekrivanje, da kratka podmnožica daljšega odgovora ne šteje
+samodejno za enak zastoj.
 Dodan je regresijski primer v `test_bridge.js`; `goal_guard_lab/README.md`
 zdaj opisuje tudi omejitev stanja ob koncu relay procesa. Pred posegom je
 shranjena kopija `goal_guard_lab/bridge.js.pre-nika-review-20261012`.
-Lastnik je izrecno izbral poročilo brez ponovnega zagona testov; zato moj
-prilagojeni kandidat **še nima novega testnega izida** in ga ne označujem kot
-potrjenega v živi seji. Zaganjalnikov, Ollaminih tagov in vzorčenja nisem
-spreminjala.
+Lastnik je izrecno izbral poročilo brez ponovnega zagona testov pri Niki.
+KERN je pozneje izvedel izolirani preizkus po zadnji prilagoditvi; rezultat
+je zapisan spodaj. To še ni potrditev vedenja v živi seji. Zaganjalnikov,
+Ollaminih tagov in vzorčenja pri tem pregledu nisem spreminjala.
+
+KERN je nato poročal, da je po prvem zoženju eden od desetih izoliranih
+testov padel: tri parafraze iste zahteve za PostgreSQL niso bile prepoznane
+kot zaporedje. Prag sem zato prilagodila na zgornjih 60 % ob dodatnem pogoju
+75-% razmerja dolžin. Sama testov na lastnikovo zahtevo nisem zagnala.
+KERN je po zadnji prilagoditvi poročal o ponovnem
+`node --test test_bridge.js`: **10/10 uspešno**. To potrjuje izolirane primere v tem
+testnem naboru, ne delovanja vseh sej ali modelov.
 
 | Ukaz | Aktivni Ollama tag | Temp. / top_p / top_k | Privzeto reasoning |
 | --- | --- | --- | --- |
@@ -394,3 +403,52 @@ Ob spremembi nastavitev: preveri stanje in obstoječe vrednosti, spremeni le
 dogovorjeni profil, preberi nazaj efektivni zaganjalnik/konfiguracijo/Modelfile,
 zapiši datum in dejansko stanje sem. Ne zaganjaj modela ali testov zgolj zaradi
 posodobitve popisa brez lastnikovega ločenega dogovora.
+
+## 12. 10. 2026 — kandidat poti za patch in zanko orodij
+
+- `goal_guard_lab/stalled_command_candidate.js` je ločen, neaktiven kandidat
+  za zaznavo treh enakih neuspešnih ukazov ali poskusov patcha brez novega
+  diffa. Aktivni `bridge.js` in zaganjalniki ga ne uvažajo. Strukturiranih
+  zahtev za dovoljenje ne šteje; nov diff ali uspešen drug ukaz števec
+  ponastavi. KERN je poročal, da je
+  `node --check stalled_command_candidate.js` uspel; preverjanje sintakse je uspelo tudi
+  za `safe_patch_mcp.js`. To **ni vedenjski preizkus** kandidata, ki ostaja
+  neaktiven. Lastnik je Niki izrecno naročil poročanje brez zagona testa.
+- Samo poskusni `goal_guard_lab/gemma12-eval-catalog.json` je dobil kratko
+  navodilo za strukturirani `apply_patch` brez obvoznega pisanja datotek.
+  Aktivni Gemmin profil ni bil preklopljen. Poskusna mapa
+  `goal_guard_lab/eval_runs/gemma12_scenario_a_patchtool` ima že spremenjen
+  `calculator.py` in lastnikovo vrstico v `owner_notes.txt`; oboje ostane.
+- Stanje `ollama list` v času pregleda: prisotni so tagi Gemma 4 12B,
+  Gemma 4 26B in Ministral 3 8B (65K ter 16K). Njihovi trije aktivni
+  zaganjalniki imajo tudi obstoječ `CODEX_HOME` in katalog. Qwen 2.5 ima
+  profil, vendar njegov tag ni v trenutnem seznamu. Mistral 7B, Qwen 3.5,
+  GPT-OSS in DeepSeek nimajo niti trenutnega taga niti pripadajočega
+  `CODEX_HOME`; njihovi zaganjalniki so zato trenutno neuporabni. To je
+  popis vidnega stanja, ne razlog za brisanje ali prenos modelov.
+- Zaganjalnik Gemma 12B eksplicitno preda model in `ollama-local` tako
+  app-serverju kot CLI. Uradni app-server podpira nastavitev modela pri
+  `thread/resume`, zato je treba v izoliranem preizkusu še preveriti, ali
+  obnovljena seja ohrani lokalnega ponudnika; opaženega 401 ni mogoče
+  razglasiti za odpravljenega zgolj iz statične konfiguracije.
+
+## 12. 10. 2026 — Gemma26 in Ministral, operativni pregled
+
+- KERN je poročal, da je Gemma12 v sveži izolirani seji uporabila
+  `safe_patch.apply_patch`, ohranila lastnikovo spremembo in dosegla `1 passed`.
+  To je njegov rezultat; Nika preizkusa ni ponavljala.
+- Profil Gemma26 v `/home/mikrofix/.gemma-codex/config.toml` zdaj vsebuje
+  isti MCP strežnik `safe_patch` z enim omogočenim orodjem `apply_patch` in
+  navodilo za unified diff brez obvoznega pisanja. Katalog
+  `coder-model-catalog.json` vsebuje enako kratko izvedbeno pogodbo.
+  Zaganjalnik ostaja nespremenjen in še vedno kaže na ta profil ter obstoječi
+  tag `mikrofix/gemma4:26b-coder-focused-65k`. Profil je mogoče povrniti z
+  odstranitvijo dodanega `developer_instructions`, razdelkov
+  `[mcp_servers.safe_patch]` in `[mcp_servers.safe_patch.tools.apply_patch]`
+  ter vrnitvijo `base_instructions` na prazen niz. Vedenjski preizkus Gemme26
+  ni bil izveden; statična konfiguracija ni dokaz, da bo model orodje uporabil.
+- `ollama list` trenutno kaže oba Ministralova taga, toda `ollama show`
+  za 65K in 16K vrne `model not found`. To je potrjena operativna ovira,
+  vzrok pa ostaja `NEPOTRJENO`. Manifesta, blobov, sistemske storitve in
+  zaganjalnika nisem spreminjala. Privilegirani bralni pregled je bil
+  prekinjen pred kakršnimkoli rezultatom.

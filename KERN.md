@@ -188,28 +188,86 @@ profil ali spremembo skupnih `AGENTS.md` in `CODER.md`.
 
 ## Trenutne potrjene ugotovitve in odprto delo
 
-Pregled `NIKA.md`, aktivnih zaganjalnikov in profilnih konfiguracij 12. 10.
-2026 potrjuje osem aktivnih `*-coder` ukazov. Vsi zahtevajo kontekst 65.536 in
-uporabljajo skupni bridge; profili se razlikujejo po modelu, reasoningu,
-vzorčenju in dodatnih navodilih. Gemma 12B je trenutno dogovorjena primerjalna
-osnova. Samostojno delovanje sedmih drugih profilov prek bridgea ni enako dobro
-potrjeno kot pri Gemmi 12B.
+Posnetek 12. 10. 2026 ločuje tri različne stvari, ki so bile prej združene pod
+izrazom »osem aktivnih modelov«:
 
-Prednostna evalvacijska vprašanja za KERN so:
+- obstaja osem `*-coder` launcherjev;
+- obstajajo samo štiri profilne mape: Gemma 12B, Gemma 26B, Ministral 8B in
+  Qwen 2.5 14B;
+- `ollama list` je ob pregledu pokazal štiri tage: Gemma 12B, Gemma 26B in dve
+  različici Ministrala 8B.
 
-1. kolikšen del nastavljenega 65K konteksta je pri vsakem modelu dejansko
-   uporaben brez opaznega padca kakovosti;
-2. ali profilna `developer_instructions` pri Gemmi 12B in Mistralu merljivo
-   pomagajo ali le podvajajo skupna navodila;
-3. ali `reasoning_effort` pri posameznem Ollama modelu povzroči pričakovano
-   thinking vedenje;
-4. kateri modeli zanesljivo uporabljajo orodja in zaključijo tipične MikroFIX
-   Python naloge;
-5. kakšna je poraba RAM/VRAM in odzivnost vsakega aktivnega profila na dejanski
-   strojni opremi.
+Launcher, profil in navedeni model je bilo mogoče povezati za Gemmo 12B,
+Gemmo 26B ter Ministral 8B, vendar naknadni neposredni `ollama show` in API
+pregled Ministralovih dveh tagov vračata 404. Zato sta trenutno potrjeno
+dosegljivi samo Gemma 12B in Gemma 26B; Ministralov vpis je pokvarjen ali
+zastarel. Preostalih pet launcherjev ni potrjeno uporabnih. To ni dokaz, da so
+bili modeli namerno izbrisani, temveč izmerjeno stanje na tej napravi.
 
-Ti izidi še niso izmerjeni v okviru tega zapisa in zato ostajajo
-**NEPOTRJENI**, dokler ni izveden dogovorjeni eval.
+Prvi vedenjski eval Gemme 12B je reproduciral glavni zastoj:
+
+1. model je pravilno prebral dovoljene datoteke in pripravil vsebinsko pravilen
+   popravek;
+2. aktivni katalog mu ni zagotavljal združljive patch poti, zato je večkrat
+   zapisal `patch.txt` in ni spremenil ciljne datoteke;
+3. poskusno polje `"apply_patch_tool_type": "freeform"` je orodje izpostavilo,
+   vendar je Ollamin Responses vmesnik vrnil navaden `function_call` z JSON
+   ovojem; Codex 0.160.0 ga je zavrnil kot nezdružljiv payload;
+4. model je po treh zavrnitvah obšel pogodbo s `sed -i`; vsebinska sprememba in
+   test sta bila uspešna, način izvedbe pa ni prestal varnostnih vrat;
+5. poskusni shell adapter je pokazal, da samo dodajanje ukaza v `PATH` ni
+   dovolj: model menja oblike klica in ponavlja enako napako;
+6. sedanji Goal Guard prestreže ponavljajoče final odgovore, ne pa ponavljajočih
+   neuspešnih tool oziroma shell akcij, zato teh zank ni ustavil.
+
+Dokazne seje so `01a130e2-c40f-7002-8dc7-51894c0821b1` za prvotni zastoj in
+`01a130e7-f3c1-7571-ba16-3b9668eecd8a` za nezdružljiv strukturirani patch.
+Izolirani fixture in protokol sta v `/home/mikrofix/goal_guard_lab/`; produkcijska
+koda MikroFIX pri evalvaciji ni bila spremenjena.
+
+Prednostni popravek je bil zato operativen, ne modelni fine-tuning. KERN je v
+izoliranem laboratoriju dodal MCP strežnik `safe_patch`, ki sprejme strukturiran
+unified diff, zavrne absolutne poti in `..`, pred posegom izvede
+`git apply --check` ter nato uporabi `git apply`. Aktivni profil Gemme 12B zdaj
+to orodje izpostavi in modelu prepove obvode s `sed`, preusmeritvami, `tee`,
+heredoci ali patch datotekami.
+
+Sveža seja brez posebnega eval profila, ID
+`01a130fd-f6e9-7f03-9df3-fde75b5b0c4c`, je 12. 10. 2026 dokazala celoten tok:
+
+1. model je prebral zahtevane datoteke in najprej zabeležil pričakovani padec
+   testa;
+2. sam je poklical `safe_patch.apply_patch` s pravilnim omejenim diffom;
+3. MCP je popravek sprejel, ponovni test pa je vrnil `1 passed in 0.01s`;
+4. neodvisni ponovni test je prav tako uspel, diff pa je pokazal samo dovoljeno
+   spremembo funkcije in že prej prisotno lastnikovo vrstico v `owner_notes`;
+5. produkcijska koda MikroFIX ni bila spremenjena.
+
+To je dokaz delujoče poti za Gemmo 12B, ne še splošna potrditev zanesljivosti
+vseh modelov. Gemma 26B še nima istega MCP in izvedbene pogodbe. Ministralov
+tag je treba najprej operativno popraviti. Nikin kandidat za ustavljanje treh
+ponovljenih neuspešnih ukazov ostaja neaktiven prototip. Pri nadaljevanju seje
+je treba še vedno izrecno pripeti lokalni model in provider, sicer je bil
+opažen napačen povratek na OpenAI provider.
+
+Lastnik je nato določil zaporedje **en model naenkrat**. Edini aktivni pilot je
+Gemma 12B; kratkotrajni poseg v profil Gemme 26B je bil povrnjen, Ministral pa
+ni bil spreminjan. Standardni zaganjalnik `gemma4-12b-coder` še vedno privzeto
+odpre produkcijski projekt, po omejeni spremembi pa kot edini neobvezni
+argument sprejme tudi pot do drugega obstoječega Git worktreeja. Pred zagonom
+preveri obstoj poti, zahteva njen Git koren ter obvezna `AGENTS.md` in
+`CODER.md`. Po Nikinem operativnem pregledu je dodan še izrecni prehod v ta
+koren pred zagonom bridgea, ker `safe_patch` za `git apply` uporablja
+podedovani `process.cwd()`.
+
+Za lastnikov ročni preizkus je pripravljen izolirani Git fixture
+`/home/mikrofix/goal_guard_lab/eval_runs/gemma12_owner_test`. Izhodiščni test
+namerno pade (`13 != 42`), `owner_notes.txt` pa vsebuje eno neobjavljeno
+lastnikovo spremembo, ki jo mora model ohraniti. Profil Gemme 12B temu fixtureju
+zaupa in še vedno izpostavlja samo MCP `safe_patch`. Zaganjalnik je prestal
+preverjanje sintakse ter pravilno zavrnil neobstoječo pot in podmapo Git
+projekta. Vedenjski rezultat tega novega ročnega fixtureja ostaja odprt do
+lastnikovega preizkusa.
 
 ## Viri za ponovni pregled
 
