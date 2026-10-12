@@ -17,5 +17,5 @@ dejanski rezultat. To obvestilo samo po sebi ni prošnja za odobritev.
 Razvojni projekt ima lastni `AGENTS.md` in `CODER.md`. Lokalni coderji delajo
 po svojem projektnem cilju in profilih; od njih se ne zahteva razumevanja ali
 uporabe Codexovih orodij, agentske sobe ali tega repozitorija. Poslovni kanon
-ostaja v razvojnem projektu. Ob neskladju z najnovejšo lastnikovo odločitvijo
+je fizično v tem repozitoriju, v `docs/kanon/`. Ob neskladju z najnovejšo lastnikovo odločitvijo
 agent vpraša lastnika in sam ne spreminja poslovnega pravila.

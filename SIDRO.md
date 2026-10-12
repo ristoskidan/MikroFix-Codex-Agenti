@@ -7,8 +7,10 @@ repozitoriju zunaj razvojnega projekta. Tam so tudi beležke Nika, Piksi,
 Svit, KERN in Prizma ter skupna soba. Lokalni coderji in njihova navodila
 ostanejo v razvojnem projektu. Pred testi in daljšimi opravili s čakanjem
 lastniku napovem namen in okvir čakanja, po koncu pa dejanski izid.
-Selitev spremeni lokacijo operativnih zapisov, ne poslovnega kanona ali
-odgovornosti za odobritve. To je potrjena strukturna odločitev lastnika
+Selitev operativnih zapisov ni spremenila odgovornosti za odobritve.
+Po dodatni lastnikovi odločitvi je tudi poslovni kanon fizično v
+`/home/mikrofix/Codex_Agenti/docs/kanon/`, ne več v razvojnem projektu.
+To je potrjena strukturna odločitev lastnika
 z dne 12. 10. 2026; projektni in agentski Git se vzdržujeta ločeno.
 
 ## Namen dokumenta
@@ -287,7 +289,45 @@ običajni zaključni odgovor; veljavno vedenje opisuje odločitev
 - Obseg zapisa je operativni pilot, ne sprememba poslovnega kanona. KERN
   poroča, da produkcijska koda in drugi modeli s tem popravkom niso spremenjeni.
 
+### SIDRO-20261012-17 — Zaščita ponavljajočih vsebinskih blokov
+
+- Odločitev lastnika z dne 12. 10. 2026: tretji pojav istega ali skoraj istega
+  vsebinskega bloka sproži ustavitev in predajo lastniku tudi med tekočim
+  odgovorom. Ne čaka se na tri zaključene odgovore.
+- Vir potrditve: lastnikovi sporočili v KERNovi seji
+  `01a1300f-5aab-73b1-98a6-a09bd252e113`, sporočili
+  `01a1316e-adba-71b1-9b9b-475f22311381` in
+  `01a13173-2a27-72e3-843a-6518e43fe703`, ter predaja v SOBA.md.
+- Stanje: pravilo in priprava sta odobrena; izvedba, testni uspeh in aktivacija
+  nove zaščite s tem zapisom niso potrjeni. Meja podobnosti zahteva meritev in
+  pregled. Presledki in manjše besedne razlike niso napredek; dejansko nov
+  ukaz ali popravek ne sme biti samodejno štet kot ponovitev.
+- KERN pripravi izolirani kandidat in teste, vključno s poljubno razdeljenim
+  pretočnim besedilom in negativnimi primeri nove vsebine. Nika pregleda
+  dogodke, deduplikacijo, prekinitveni protokol, reset in povratno pot ter
+  operativno integracijo. Lastnik sprejme rezultat in nadaljnjo uvedbo.
+- Obseg je samo Gemma12. Obstoječa zaščita WAITING_OWNER in zaključenih
+  odgovorov ter kompakcija pri 55000 ostanejo; nova zaščita je dopolnitev,
+  ne razveljavitev SIDRO-20261012-12. Aktivnih sej med pripravo ne prevezujemo
+  in ne ustavljamo. Brez sprememb produkcijske kode, drugih modelov, aktivne
+  davčne naloge, commita ali pusha.
+- KERNov predani regresijski primer vsebuje 31 identičnih ciklov po 1530
+  bajtov in 45 vrstic v vrstici 122 starejšega dnevnika. Velikost je lastnost
+  primera, ne univerzalni prag. Sidro tega dnevnika ali detektorja še ni
+  neodvisno preveril; končna dokazila ostajajo odprta.
+
 ## Razrešena vprašanja
+
+### SIDRO-20261012-18 — Fizična selitev kanona
+
+- Lastnik je izrecno naročil selitev kanona v agentski repozitorij.
+- Vseh sedem kanonskih dokumentov je prenesenih v `docs/kanon/` tega
+  repozitorija. Poslovna pravila ostajajo nespremenjena. V projektu ni
+  kopije ali simbolne povezave; koda, testi, okolja in zaganjalniki niso
+  spremenjeni. Projektna AGENTS.md in CODER.md ostajata na mestu.
+- Stara orodja s trdo zapisano projektno potjo kanona še niso prilagojena.
+  Ta selitev sama ne potrjuje njihovega delovanja. Preostala dokumentacija
+  ni del tega opravljenega prenosa.
 
 ### SIDRO-OPEN-01 — Izolirani preizkus varovalke
 

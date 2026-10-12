@@ -5,7 +5,12 @@ To je samostojen Git repozitorij s fizičnimi datotekami v
 operativni beležniki strokovnih agentov Codex in skupna soba. Lokalni coderji,
 njihovi profili, zaganjalniki in zgodovinska orodja ostanejo v
 `/home/mikrofix/MikroFIX_Service_v30_R9_LINUX_DEV/docs/local_agents/` ter
-projektnem `CODER.md`. Poslovni kanon ostane v projektnem `docs/kanon/`.
+projektnem `CODER.md`. Poslovni kanon je fizično v tem repozitoriju,
+v [`docs/kanon/00_KAZALO.md`](docs/kanon/00_KAZALO.md). V razvojnem
+projektu ni njegove kopije ali simbolne povezave. Stara agentska orodja,
+ki uporabljajo prejšnjo pot, še niso prilagojena; njihova prilagoditev
+je ločeno opravilo. Zagonski navodili `AGENTS.md` in `CODER.md` ostajata
+na obstoječem mestu.
 
 ## Odgovornosti
 

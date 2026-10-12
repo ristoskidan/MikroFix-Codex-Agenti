@@ -452,3 +452,54 @@ posodobitve popisa brez lastnikovega ločenega dogovora.
   vzrok pa ostaja `NEPOTRJENO`. Manifesta, blobov, sistemske storitve in
   zaganjalnika nisem spreminjala. Privilegirani bralni pregled je bil
   prekinjen pred kakršnimkoli rezultatom.
+
+## 12. 10. 2026 — izolirani pretočni kandidat Gemma12
+
+- Dodan `goal_guard_lab/stream_blocks.js`: tretja neprekrivajoča se
+  ponovitev daljšega besedilnega bloka v istem agentovem sporočilu zahteva
+  `turn/interrupt` tekočega obrata. Reasoning, orodni izhodi in strukturirane
+  zahteve za dovoljenje niso predmet detekcije. Omejitve in hevristike so
+  navedene v laboratorijskem README; kandidat ni dokazano delujoča zaščita.
+- Bridge ga naloži samo ob `NIKA_STREAM_GUARD=1`. Dodano je omejeno
+  ponavljanje neuspele prekinitve, ločevanje potrditve zahtevka od dejansko
+  prekinjenega obrata in beleženje dogodkov. Stari način ostaja privzet.
+- Ročni zagon: `bash /home/mikrofix/goal_guard_lab/gemma12-stream-trial.sh`.
+  Uporabi obstoječi Gemma12 coder profil in izolirani `gemma12_owner_test`,
+  brez spremembe običajnih zaganjalnikov ali prevezovanja aktivnih sej.
+- Pripravljeni `test_stream_blocks.js` ni bil zagnan. Nika ni zaganjala
+  modela, testov ali izvršljivega preverjanja sintakse. Potrditev prekinitve,
+  pavziranega cilja, uporabnega terminala in nadaljevanja je še NEPOTRJENO;
+  lastnik opravi naslednji preizkus. Ni commita ali pusha.
+
+## 12. 10. 2026 — lastnikova poenostavitev navodil
+
+- Gemma12: odstranjen začetni poziv iz `gemma4-12b-coder`; skupni profil
+  `.gemma12-codex/config.toml` ima prazen `developer_instructions`, katalog
+  pa prazen `base_instructions`. Orodja in parametri modela ostajajo.
+  Testni zagon dodatno eksplicitno preglasi developer navodila s praznim nizom.
+- Testni `gemma12_owner_test/AGENTS.md`: odstranjeni navedbi o omejitvi na
+  `calculator.py` ter uporabi `safe_patch`; ostala testna pravila ostajajo.
+- Po izrecni lastnikovi zahtevi je projektni `AGENTS.md` arhiviran v
+  `docs/local_agents/archive/AGENTS-2026-10-12-before-bare-notebook.md`.
+  Nova aktivna različica vsebuje naslov Beležka in samo navodilo:
+  »1. Preverim delovno mapo in preverim pravice branja in pisanja«.
+  To je skupno navodilo novih sej v projektu, ne samo Gemme. `CODER.md`
+  ni bil odstranjen ali spremenjen; vgrajena navodila Codex ostajajo.
+- Mistral in Ministral: odstranjen začetni poziv iz `mistral-7b-coder` in
+  `ministral-3-8b-coder`. Oba profila imata prazen `developer_instructions`;
+  oba kataloga sta že imela prazen `base_instructions`. Nimata profilnega
+  `AGENTS.md`; uporabljata zgornji skupni projektni dokument.
+- Tagi modelov, bridge, orodja, kontekst 65536, kompakcija 55000 in reasoning
+  none so ohranjeni. Ni zagona modelov, testov, commita ali pusha.
+  Prejšnje opažene težave z dostopnostjo modelov s tem niso odpravljene ali
+  ponovno preverjene. Spremembe navodil veljajo v novih sejah.
+
+## 12. 10. 2026 — delovna mapa vseh coder zaganjalnikov
+
+- Vseh osem aktivnih zaganjalnikov pred zagonom bridgea preklopi dejansko
+  delovno mapo na izbrani projekt in isto pot poda Codexu z `-C`.
+- Sedmim zaganjalnikom dodan `cd -- "$workspace" || exit 1`; Gemma 12B je
+  preklop že imela in ohranja izbiro izoliranega projekta.
+- Privzeta mapa je `/home/mikrofix/MikroFIX_Service_v30_R9_LINUX_DEV`.
+  Domači mapi ni bilo dodano zaupanje. Obstoječe seje niso spreminjane.
+- Preverjen zapis poti v datotekah; zaganjalniki in modeli niso bili zagnani.
